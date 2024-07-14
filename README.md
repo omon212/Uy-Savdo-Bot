@@ -1,2 +1,2 @@
-# UySavdoBOt 
-# With Shams and Momon
+# Uy Savdo Bot
+# With Shamsiddin and Omonullo
