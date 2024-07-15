@@ -28,6 +28,19 @@ class Uchastka(StatesGroup):
     kanalga_yuborish = State()
 
 
+
+class TaunHouse(StatesGroup):
+    sotix = State()
+    lokatsiya = State()
+    xona = State()
+    ha_yoki_yoq = State()
+    remont = State()
+    remont_qancha = State()
+    remont_narx = State()
+    kanalga_yuborish = State()
+
+
+
 class AdminState(StatesGroup):
     admin = State()
     tuman = State()
