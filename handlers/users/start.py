@@ -1844,3 +1844,4 @@ async def uchastkaremontnarx(message: types.Message, state: FSMContext):
         else:
             await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
 
+
