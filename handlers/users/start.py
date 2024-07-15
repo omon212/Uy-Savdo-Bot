@@ -54,7 +54,7 @@ uz_tumanlar_list = [
 ]
 
 
-def generate_map_link(latitude, longitude):
+async def generate_map_link(latitude, longitude):
     base_url = "https://www.google.com/maps?q="
     return f"{base_url}{latitude},{longitude}"
 
@@ -289,9 +289,9 @@ async def narxlash(message: types.Message, state: FSMContext):
     await record_stat(message.from_user.id)
     til = await check_user(message.from_user.id)
     if til[2] == "ru":
-        await message.answer(f"<b>Пожалуйста, выберите одну из следующих категорий:</b>", reply_markup=uz_tumanlar_btn)
+        await message.answer(f"<b>Пожалуйста, выберите одну из следующих категорий 🚩</b>", reply_markup=uz_tumanlar_btn)
     elif til[2] == "uz":
-        await message.answer(f"<b>Iltimos, quyidagi tumanlardan birini tanlang:</b>", reply_markup=uz_tumanlar_btn)
+        await message.answer(f"<b>Iltimos, quyidagi tumanlardan birini tanlang 🚩</b>", reply_markup=uz_tumanlar_btn)
     await UserState.yer_tuman.set()
 
 
@@ -324,9 +324,9 @@ async def quruq_yer(message: types.Message, state: FSMContext):
     await record_stat(user_id)
     fake_data[user_id]['kategoriya'] = "Quruq Yer"
     if til[2] == "ru":
-        await message.answer(f"<b>Отправьте пожалуйста площадь вашего {message.text}</b>")
+        await message.answer(f"<b>Отправьте пожалуйста площадь вашего {message.text} 📏</b>", reply_markup=ru_ortga)
     else:
-        await message.answer(f"<b>Iltimos, {message.text}ingizning sotixini yuboring</b>")
+        await message.answer(f"<b>Iltimos, {message.text}ingizning sotixini yuboring 📏</b>", reply_markup=uz_ortga)
     await state.finish()
     await QuruqYerState.sotix.set()
 
@@ -337,36 +337,38 @@ async def quruqyersotix(message: types.Message, state: FSMContext):
     await record_stat(user_id)
     isnumber = message.text.isdigit()
     if isnumber == True:
-        fake_data[user_id]['sotix'] = message.text
+        fake_data[user_id]['quruq_yer_sotix'] = message.text
         if til[2] == "ru":
-            await message.answer(f"<b>Отправьте пожалуйста геолокацию вашего {fake_data[user_id]['kategoriya']}:</b>")
+            await message.answer(f"<b>Отправьте пожалуйста геолокацию вашего {fake_data[user_id]['kategoriya']} 📍</b>",
+                                 reply_markup=ru_ortga)
         else:
-            await message.answer(f"<b>Iltimos, {fake_data[user_id]['kategoriya']}ingizning joylashuvini yuboring:</b>")
+            await message.answer(f"<b>Iltimos, {fake_data[user_id]['kategoriya']}ingizning joylashuvini yuboring 📍</b>",
+                                 reply_markup=uz_ortga)
         await state.finish()
         await QuruqYerState.lokatsiya.set()
     else:
         if til[2] == "ru":
-            await message.answer(f"<b>Только введите номер ❌</b>")
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
         else:
-            await message.answer(f"<b>Faqat son kiriting ❌</b>")
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
 
 
 @dp.message_handler(content_types=types.ContentType.LOCATION, state=QuruqYerState.lokatsiya)
 async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     await record_stat(user_id)
-    fake_data[user_id]['latitude'] = message.location.latitude
-    fake_data[user_id]['longitude'] = message.location.longitude
+    fake_data[user_id]['quruq_yerlatitude'] = message.location.latitude
+    fake_data[user_id]['quruq_yerlongitude'] = message.location.longitude
     sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-    narx = int(sotix_narx[3]) * int(fake_data[user_id]['sotix'])
+    narx = int(sotix_narx[3]) * int(fake_data[user_id]['quruq_yer_sotix'])
     rayon_ru = await translate_text(f"{fake_data[user_id]['tuman']}")
-    link = generate_map_link(fake_data[user_id]['latitude'], fake_data[user_id]['longitude'])
+    link = generate_map_link(message.location.latitude, message.location.longitude)
     if til[2] == "ru":
         await message.answer(f"""
 <b>Сухая земля 🚩</b>
 
 <b>Район 🚩</b> {rayon_ru}
-<b>Сотка 📏</b> {fake_data[user_id]['sotix']}
+<b>Сотка 📏</b> {fake_data[user_id]['quruq_yer_sotix']}
 <b>Геолокация 📍</b> <a href="{link}">Местоположение земли</a>
 
 <b>Цена 💰</b> <code>{narx}$</code>
@@ -381,7 +383,7 @@ async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
 <b>Quruq Yer 🚩</b>
 
 <b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
-<b>Sotix 📏</b> {fake_data[user_id]['sotix']}
+<b>Sotix 📏</b> {fake_data[user_id]['quruq_yer_sotix']}
 <b>Geolokatsiya 📍</b> <a href="{link}">Quruq yerning joylashuvi</a>
 
 <b>Narx 💰</b> <code>{narx}$</code>
@@ -403,7 +405,7 @@ async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
 <b>Сухая земля 🚩</b>
 
 <b>Район 🚩</b> {rayon_ru}
-<b>Сотка 📏</b> {fake_data[user_id]['sotix']}
+<b>Сотка 📏</b> {fake_data[user_id]['quruq_yer_sotix']}
 <b>Геолокация 📍</b> <a href="{link}">Местоположение земли</a>
 
 <b>Цена 💰</b> <code>{narx}$</code>                    
@@ -411,14 +413,14 @@ async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
                 for admin in ADMINS:
                     await bot.send_message(admin, caption_ru, reply_markup=ru_tasdiqlash_admin)
 
-                @dp.callback_query_handler(text="tasdiqlash_ru")
+                @dp.callback_query_handler(text="tasdiqlash_ru", state=QuruqYerState.kanalga_yuborish)
                 async def tasdiqlassh(call: types.CallbackQuery):
                     await call.message.delete()
                     await bot.send_message(user_id,
                                            "<b>Ваше объявление одобрено ✅\n\nСкоро будет отправлено на канал</b>")
                     await call.bot.send_message(CHANNEL_ID, caption_ru)
 
-                @dp.callback_query_handler(text="rad_etish_ru")
+                @dp.callback_query_handler(text="rad_etish_ru", state=QuruqYerState.kanalga_yuborish)
                 async def rad_etishh(call: types.CallbackQuery):
                     await call.message.delete()
                     await bot.send_message(user_id,
@@ -430,7 +432,7 @@ async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
 <b>Quruq Yer 🚩</b>
 
 <b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
-<b>Sotix 📏</b> {fake_data[user_id]['sotix']}
+<b>Sotix 📏</b> {fake_data[user_id]['quruq_yer_sotix']}
 <b>Geolokatsiya 📍</b> <a href="{link}">Quruq yerning joylashuvi</a>
 
 <b>Narx 💰</b> <code>{narx}$</code>                    
@@ -438,14 +440,14 @@ async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
                 for admin in ADMINS:
                     await bot.send_message(admin, caption, reply_markup=tasdiqlash_admin)
 
-                @dp.callback_query_handler(text="tasdiqlash")
+                @dp.callback_query_handler(text="tasdiqlash", state=QuruqYerState.kanalga_yuborish)
                 async def tasdiqlassh(call: types.CallbackQuery):
                     await call.message.delete()
                     await bot.send_message(user_id,
                                            "<b>Sizning eloningiz tasdiqlandi ✅\n\nYaqin orada kanalga yuboriladi</b>")
                     await call.bot.send_message(CHANNEL_ID, caption)
 
-                @dp.callback_query_handler(text="rad_etish")
+                @dp.callback_query_handler(text="rad_etish", state=QuruqYerState.kanalga_yuborish)
                 async def rad_etishh(call: types.CallbackQuery):
                     await call.message.delete()
                     await bot.send_message(user_id,
@@ -468,3 +470,226 @@ async def quruqyerlokatsiya(message: types.Message, state: FSMContext):
         else:
             await message.answer(f"<b>Botdan foydalanganingiz uchun rahmat ☺️</b>",
                                  reply_markup=uz_menu)
+        await state.finish()
+
+
+# -------------------UCHASTKA-------------------#
+
+
+@dp.message_handler(text='Uchastka', state=UserState.yer_kategoriya)
+async def uchastkaa(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    fake_data[user_id]['kategoriya'] = "Uchastka"
+    if til[2] == "ru":
+        await message.answer(f"<b>Отправьте пожалуйста площадь вашего {message.text} 📏</b>",
+                             reply_markup=ru_ortga)
+    else:
+        await message.answer(f"<b>Iltimos, {message.text}ingizning sotixini yuboring 📏</b>",
+                             reply_markup=uz_ortga)
+    await state.finish()
+    await Uchastka.sotix.set()
+
+
+@dp.message_handler(state=Uchastka.sotix)
+async def uchastkasotix(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    isnumber = message.text.isdigit()
+    if isnumber == True:
+        fake_data[user_id]['uchastka_sotix'] = message.text
+        if til[2] == "ru":
+            await message.answer(f"<b>Отправьте пожалуйста геолокацию вашего {fake_data[user_id]['kategoriya']} 📍</b>",
+                                 reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Iltimos, {fake_data[user_id]['kategoriya']}ingizning joylashuvini yuboring 📍</b>",
+                                 reply_markup=uz_ortga)
+        await state.finish()
+        await Uchastka.lokatsiya.set()
+    else:
+        if til[2] == "ru":
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
+
+
+@dp.message_handler(content_types=types.ContentType.LOCATION, state=Uchastka.lokatsiya)
+async def uchastkalokatsiya(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    fake_data[user_id]['uchastka_latitude'] = message.location.latitude
+    fake_data[user_id]['uchastka_longitude'] = message.location.longitude
+    if til[2] == "ru":
+        await message.answer(f"<b>Пожалуйста, сообщите, сколько комнат доступно на вашем участке 🏢</b>",
+                             reply_markup=ru_ortga)
+    else:
+        await message.answer(f"<b>Iltimos, uchastkangizda necha xona borligini yuboring 🏢</b>",
+                             reply_markup=uz_ortga)
+
+    await state.finish()
+    await Uchastka.xona.set()
+
+
+@dp.message_handler(state=Uchastka.xona)
+async def uchastkaxona(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    isnumber = message.text.isdigit()
+    if isnumber == True:
+        fake_data[user_id]['uchastka_xona'] = message.text
+        if til[2] == "ru":
+            await message.answer(f"<b>Вы отремонтировали свой дом 🛠?</b>", reply_markup=ok_no_ru)
+        else:
+            await message.answer(f"<b>Uyingizni tamirlaganmisiz 🛠?</b>", reply_markup=ok_no)
+        await state.finish()
+        await Uchastka.remont.set()
+
+    else:
+        if til[2] == "ru":
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
+
+
+@dp.message_handler(text=["Да ✅", "Ha ✅"], state=Uchastka.remont)
+async def uchastkaremont(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    if til[2] == "ru":
+        fake_data[user_id]['uchastka_remont'] = "Да ✅"
+        await message.answer(
+            f"<b>Пожалуйста, сообщите, сколько вы потратили на ремонт вашего участка 💲?\n\nОтправляйте только доллары</b>",
+            reply_markup=ru_ortga)
+
+    else:
+        fake_data[user_id]['uchastka_remont'] = "Ha ✅"
+        await message.answer(
+            f"<b>Iltimos, uchastkangizni ta'miwrlash uchun qancha pul sarflaganingizni yuboring 💲?\n\nFaqat dollarda yuboring</b>",
+            reply_markup=uz_ortga)
+    await state.finish()
+    await Uchastka.remont_narx.set()
+
+
+@dp.message_handler(state=Uchastka.remont_narx)
+async def uchastkaremontnarx(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    isnumber = message.text.isdigit()
+    if isnumber == True:
+        fake_data[user_id]['uchastka_remont_narx'] = message.text
+        link = await generate_map_link(fake_data[user_id]['uchastka_latitude'],
+                                       fake_data[user_id]['uchastka_longitude'])
+        sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx = int(sotix_narx[3]) * int(fake_data[user_id]['uchastka_sotix']) + int(message.text)
+        print(narx)
+        if til[2] == "ru":
+            tuman = await translate_text(fake_data[user_id]['tuman'])
+            caption_ru = f"""
+<b>Участка 🚩</b>
+
+<b>Туман 🚩</b> {tuman}
+<b>Сотка 📏</b> {fake_data[user_id]['uchastka_sotix']}
+<b>Геолокация 📍</b> <a href="{link}">Местоположение участка</a>
+<b>Комнаты 🏢</b> {fake_data[user_id]['uchastka_xona']}
+<b>Ремонт 🛠</b> {fake_data[user_id]['uchastka_remont']}
+<b>Ремонт на сумму 💰</b> <code>{fake_data[user_id]['uchastka_remont_narx']}</code> 
+<b>Цена 💰</b> <code>{narx}$</code>    
+
+<b>Хотите рекламировать этот товар на нашем канале 📣</b>              
+            """
+            await message.answer(caption_ru, reply_markup=ok_no_ru)
+        else:
+            caption = f"""
+<b>Uchastka 🚩</b>
+
+<b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
+<b>Sotix 📏</b> {fake_data[user_id]['uchastka_sotix']}
+<b>Geolokatsiya 📍</b> <a href="{link}">Uchastkangizning joylashuvi</a>
+<b>Xona 🏢</b> {fake_data[user_id]['uchastka_xona']}
+<b>Remont 🛠</b> {fake_data[user_id]['uchastka_remont']}
+<b>Remont narxi 💰</b> <code>{fake_data[user_id]['uchastka_remont_narx']}$</code>
+<b>Narx 💰</b> <code>{narx}$</code>
+
+<b>Siz ushbu mahsulotingizni bizning kanalimizga elon berishni xohlaysizmi 📣</b>
+            """
+            await message.answer(caption, reply_markup=ok_no)
+        await state.finish()
+        await Uchastka.kanalga_yuborish.set()
+
+        @dp.message_handler(text=["Ha ✅", "Да ✅"], state=Uchastka.kanalga_yuborish)
+        async def hayokiyoq(message: types.Message):
+            user_id = message.from_user.id
+            chat_member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
+            if chat_member.status in ['member', 'administrator', 'creator']:
+                if til[2] == "ru":
+                    caption_ru = f"""
+<b>Участка 🚩</b>
+
+<b>Туман 🚩</b> {tuman}
+<b>Сотка 📏</b> {fake_data[user_id]['uchastka_sotix']}
+<b>Геолокация 📍</b> <a href="{link}">Местоположение участка</a>
+<b>Комнаты 🏢</b> {fake_data[user_id]['uchastka_xona']}
+<b>Ремонт 🛠</b> {fake_data[user_id]['uchastka_remont']}
+<b>Ремонт на сумму 💰</b> <code>{fake_data[user_id]['uchastka_remont_narx']}</code>  
+<b>Цена 💰</b> <code>{narx}$</code>           
+                                """
+                    for admin in ADMINS:
+                        await bot.send_message(admin, caption_ru, reply_markup=ru_tasdiqlash_admin)
+
+                    @dp.callback_query_handler(text="tasdiqlash_ru", state=Uchastka.kanalga_yuborish)
+                    async def tasdiqlassh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Ваше объявление одобрено ✅\n\nСкоро будет отправлено на канал</b>")
+                        await call.bot.send_message(CHANNEL_ID, caption_ru)
+
+                    @dp.callback_query_handler(text="rad_etish_ru", state=Uchastka.kanalga_yuborish)
+                    async def rad_etishh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Ваше объявление отклонено ❌\n\nСпасибо за использование бота ☺</b>")
+
+                else:
+                    await message.answer(
+                        "<b>Sizning eloningiz qabul qilindi ✅\n\n24 soat ichida sizning eloningiz admin tomonidan tekshiriladi</b>")
+                    caption = f"""
+<b>Uchastka 🚩</b>
+
+<b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
+<b>Sotix 📏</b> {fake_data[user_id]['uchastka_sotix']}
+<b>Geolokatsiya 📍</b> <a href="{link}">Uchastkangizning joylashuvi</a>
+<b>Xona 🏢</b> {fake_data[user_id]['uchastka_xona']}
+<b>Remont 🛠</b> {fake_data[user_id]['uchastka_remont']}
+<b>Remont narxi 💰</b> <code>{fake_data[user_id]['uchastka_remont_narx']}$</code>
+<b>Narx 💰</b> <code>{narx}$</code>
+                                """
+                    for admin in ADMINS:
+                        await bot.send_message(admin, caption, reply_markup=tasdiqlash_admin)
+
+                    @dp.callback_query_handler(text="tasdiqlash", state=Uchastka.kanalga_yuborish)
+                    async def tasdiqlassh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Sizning eloningiz tasdiqlandi ✅\n\nYaqin orada kanalga yuboriladi</b>")
+                        await call.bot.send_message(CHANNEL_ID, caption)
+                        await state.finish()
+
+                    @dp.callback_query_handler(text="rad_etish", state=Uchastka.kanalga_yuborish)
+                    async def rad_etishh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Sizning eloningiz tasdiqlanmadi ❌\n\nBotdan foydalananganingiz uchun rahmat ☺️</b>")
+                        await state.finish()
+            else:
+                if til[2] == "ru":
+                    await message.answer(f"Сначала подпишитесь на наш канал и попробуйте снова\n\n{CHANNEL_LINK}",
+                                         reply_markup=ok_no_ru)
+                else:
+                    await message.answer(
+                        f"Avvalam bor bizning kanalga obuna bo'ling va qayta urinib ko'ring\n\n{CHANNEL_LINK}",
+                        reply_markup=ok_no)
+    else:
+        if til[2] == "ru":
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)

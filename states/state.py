@@ -23,6 +23,9 @@ class Uchastka(StatesGroup):
     xona = State()
     ha_yoki_yoq = State()
     remont = State()
+    remont_qancha = State()
+    remont_narx = State()
+    kanalga_yuborish = State()
 
 
 class AdminState(StatesGroup):

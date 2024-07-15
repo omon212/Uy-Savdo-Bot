@@ -34,6 +34,16 @@ ru_menu = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+ru_ortga = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Назад ◀️"),
+        ],
+    ],
+    resize_keyboard=True
+)
+
+
 ru_settings = ReplyKeyboardMarkup(
     keyboard=[
         [

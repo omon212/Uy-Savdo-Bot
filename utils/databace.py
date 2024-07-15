@@ -13,22 +13,9 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS narxlar(
                 category TEXT,
                 narx INTEGER)""")
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS kategory (
-    id INTEGER PRIMARY KEY,
-    tuman TEXT,
-    kategory TEXT,
-    sotix INTEGER NULL,
-    longitude TEXT,
-    latitude TEXT,
-    xona INTEGER NULL,
-    kvadratura INTEGER NULL,
-    remonti TEXT NULL, 
-    narx INTEGER
-)""")
+cursor.execute("""DROP TABLE IF EXISTS kategory""")
 
 connect.commit()
-
 
 async def check_user(user_id):
     result = cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
