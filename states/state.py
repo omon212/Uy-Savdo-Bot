@@ -56,3 +56,13 @@ class EvroDom(StatesGroup):
     remont_qancha = State()
     remont_narx = State()
     kanalga_yuborish = State()
+
+class PenHouse(StatesGroup):
+    kvadratura = State()
+    lokatsiya = State()
+    xona = State()
+    ha_yoki_yoq = State()
+    remont = State()
+    remont_qancha = State()
+    remont_narx = State()
+    kanalga_yuborish = State()
