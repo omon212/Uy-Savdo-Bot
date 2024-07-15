@@ -47,3 +47,12 @@ class AdminState(StatesGroup):
     kategoriya = State()
     narx = State()
     change_language = State()
+
+class EvroDom(StatesGroup):
+    lokatsiya = State()
+    xona = State()
+    ha_yoki_yoq = State()
+    remont = State()
+    remont_qancha = State()
+    remont_narx = State()
+    kanalga_yuborish = State()

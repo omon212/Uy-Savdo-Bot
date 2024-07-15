@@ -1175,3 +1175,326 @@ async def uchastkaremontnarx(message: types.Message, state: FSMContext):
             await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
         else:
             await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
+
+
+
+#------------------EVRO DOM------------------#
+
+
+@dp.message_handler(text='Evro Dom', state=UserState.yer_kategoriya)
+async def uchastkaa(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    fake_data[user_id]['kategoriya'] = "Evro Dom"
+    if til[2] == "ru":
+        await message.answer(f"<b>Отправьте пожалуйста геолокацию вашего {fake_data[user_id]['kategoriya']} 📍</b>",
+                             reply_markup=ru_ortga)
+    else:
+        await message.answer(f"<b>Iltimos, {fake_data[user_id]['kategoriya']}ingizning joylashuvini yuboring 📍</b>",
+                             reply_markup=uz_ortga)
+    await state.finish()
+    await EvroDom.lokatsiya.set()
+
+@dp.message_handler(state=EvroDom.lokatsiya, content_types=types.ContentType.LOCATION)
+async def uchastlokatsiya(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    fake_data[user_id]['evrodom_latitude'] = message.location.latitude
+    fake_data[user_id]['evrodom_longitude'] = message.location.longitude
+
+    if til[2] == "ru":
+
+        await message.answer(f"<b>Пожалуйста, сообщите, сколько комнат доступно на вашем <b>EVRO DOM</b> 🏢</b>",
+                             reply_markup=ru_ortga)
+    else:
+        await message.answer(f"<b>Iltimos, Evrodomda necha xona borligini yuboring 🏢</b>",
+                             reply_markup=uz_ortga)
+
+    await state.finish()
+    await EvroDom.xona.set()
+
+@dp.message_handler(state=EvroDom.xona)
+async def evro_dom_xona(message:types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    isnumber = message.text.isdigit()
+    if isnumber == True:
+        fake_data[user_id]['evrodom_xona'] = message.text
+        if til[2] == "ru":
+            await message.answer(f"<b>Вы отремонтировали свой <b>EVRO DOM</b> 🛠?</b>", reply_markup=ok_no_ru)
+        else:
+            await message.answer(f"<b>Evrodomni tamirlaganmisiz 🛠?</b>", reply_markup=ok_no)
+        await state.finish()
+        await EvroDom.remont.set()
+        print(fake_data[user_id])
+    else:
+        if til[2] == "ru":
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
+
+@dp.message_handler(text=["Да ✅", "Ha ✅"], state=EvroDom.remont)
+async def evro_dom_remont(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    if til[2] == "ru":
+        fake_data[user_id]['evrodom_remont'] = "Да ✅"
+        await message.answer(
+            f"<b>Пожалуйста, сообщите, сколько вы потратили на ремонт вашего <b>EVRO DOM</b> 💲?\n\nОтправляйте только доллары</b>",
+            reply_markup=ru_ortga)
+
+    else:
+        fake_data[user_id]['evrodom_remont'] = "Ha ✅"
+        await message.answer(
+            f"<b>Iltimos, Evrodomni ta'mirlash uchun qancha pul sarflaganingizni yuboring 💲?\n\nFaqat dollarda yuboring</b>",
+            reply_markup=uz_ortga)
+    await state.finish()
+    await EvroDom.remont_narx.set()
+    print(fake_data[user_id])
+
+
+@dp.message_handler(text=["Нет ❌", "Yoq ❌"], state=EvroDom.remont)
+async def evro_dom_remont(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    if til[2] == "ru":
+        fake_data[user_id]['evrodom_remont'] = "Нет ❌"
+    else:
+        fake_data[user_id]['evrodom_remont'] = "Yoq ❌"
+
+    user_id = message.from_user.id
+    await record_stat(user_id)
+
+    if message.text in ["Нет ❌", "Yoq ❌"]:
+        link = await generate_map_link(fake_data[user_id]['evrodom_latitude'],
+                                       fake_data[user_id]['evrodom_longitude'])
+        sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx = int(sotix_narx[3]) * int(fake_data[user_id]['evrodom_xona'])
+        print(narx)
+        if til[2] == "ru":
+            tuman = await translate_text(fake_data[user_id]['tuman'])
+            caption_ru = f"""
+            <b>евродом 🚩</b>
+
+            <b>Туман 🚩</b> {tuman}
+            <b>Геолокация 📍</b> <a href="{link}">Местоположение евродом</a>
+            <b>Комнаты 🏢</b> {fake_data[user_id]['evrodom_xona']}
+            <b>Ремонт 🛠</b> {fake_data[user_id]['evrodom_remont']}
+            <b>Цена 💰</b> <code>{narx}$</code>    
+
+            <b>Хотите рекламировать этот товар на нашем канале 📣</b>              
+                            """
+            await message.answer(caption_ru, reply_markup=ok_no_ru)
+        else:
+            tuman = await translate_text(fake_data[user_id]['tuman'])
+            caption_uz = f"""
+                       <b>EvroDOm 🚩</b>
+
+                       <b>Tuman 🚩</b> {tuman}
+                       <b>Lakatsiya 📍</b> <a href="{link}">Местоположение евродом</a>
+                       <b>Xona 🏢</b> {fake_data[user_id]['evrodom_xona']}
+                       <b>Remont 🛠</b> {fake_data[user_id]['evrodom_remont']}
+                       <b>Narxi 💰</b> <code>{narx}$</code>    
+
+                       <b>Kanalimizda ushbu mahsulotni reklama qilmoqchimisiz 📣</b>              
+                                       """
+            await message.answer(caption_uz, reply_markup=ok_no_ru)
+            await state.finish()
+            await EvroDom.kanalga_yuborish.set()
+
+        @dp.message_handler(text=["Ha ✅", "Да ✅"], state=EvroDom.kanalga_yuborish)
+        async def hayokiyoq(message: types.Message):
+            user_id = message.from_user.id
+            chat_member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
+            tuman = await translate_text(fake_data[user_id]['tuman'])
+            if chat_member.status in ['member', 'administrator', 'creator']:
+                if til[2] == "ru":
+                    caption_ru = f"""
+<b>евродом 🚩</b>
+
+<b>Туман 🚩</b> {tuman}
+<b>Геолокация 📍</b> <a href="{link}">Местоположение евродом</a>
+<b>Комнаты 🏢</b> {fake_data[user_id]['evrodom_xona']}
+<b>Ремонт 🛠</b> {fake_data[user_id]['evrodom_remont']}
+<b>Цена 💰</b> <code>{narx}$</code>    
+                                        """
+                    for admin in ADMINS:
+                        await bot.send_message(admin, caption_ru, reply_markup=ru_tasdiqlash_admin)
+
+                    @dp.callback_query_handler(text="tasdiqlash_ru", state=EvroDom.kanalga_yuborish)
+                    async def tasdiqlassh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Ваше объявление одобрено ✅\n\nСкоро будет отправлено на канал</b>")
+                        await call.bot.send_message(CHANNEL_ID, caption_ru)
+
+                    @dp.callback_query_handler(text="rad_etish_ru", state=EvroDom.kanalga_yuborish)
+                    async def rad_etishh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Ваше объявление отклонено ❌\n\nСпасибо за использование бота ☺</b>")
+
+                else:
+                    await message.answer(
+                            "<b>Sizning eloningiz qabul qilindi ✅\n\n24 soat ichida sizning eloningiz admin tomonidan tekshiriladi</b>")
+                    caption =  f"""
+<b>EvroDom 🚩</b>
+
+<b>Tuman 🚩</b> {tuman}
+<b>Lakatsiya 📍</b> <a href="{link}">Местоположение евродом</a>
+<b>Xona 🏢</b> {fake_data[user_id]['evrodom_xona']}
+<b>Remont 🛠</b> {fake_data[user_id]['evrodom_remont']}
+<b>Narxi 💰</b> <code>{narx}$</code>    
+
+<b>Kanalimizda ushbu mahsulotni reklama qilmoqchimisiz 📣</b>              
+                                       """
+                    for admin in ADMINS:
+                        await bot.send_message(admin, caption, reply_markup=tasdiqlash_admin)
+
+                    @dp.callback_query_handler(text="tasdiqlash", state=EvroDom.kanalga_yuborish)
+                    async def tasdiqlassh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Sizning eloningiz tasdiqlandi ✅\n\nYaqin orada kanalga yuboriladi</b>")
+                        await call.bot.send_message(CHANNEL_ID, caption)
+                        await state.finish()
+
+                    @dp.callback_query_handler(text="rad_etish", state=EvroDom.kanalga_yuborish)
+                    async def rad_etishh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,"<b>Sizning eloningiz tasdiqlanmadi ❌\n\nBotdan foydalananganingiz uchun rahmat ☺️</b>")
+                        await state.finish()
+            else:
+                if til[2] == "ru":
+                    await message.answer(f"Сначала подпишитесь на наш канал и попробуйте снова\n\n{CHANNEL_LINK}",
+                                         reply_markup=ok_no_ru)
+                else:
+                    await message.answer(
+                        f"Avvalam bor bizning kanalga obuna bo'ling va qayta urinib ko'ring\n\n{CHANNEL_LINK}",
+                        reply_markup=ok_no)
+    else:
+        if til[2] == "ru":
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
+
+
+@dp.message_handler(state=EvroDom.remont_narx)
+async def uchastkaremontnarx(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    await record_stat(user_id)
+    isnumber = message.text.isdigit()
+    if isnumber == True:
+        fake_data[user_id]['evrodom_remont_narx'] = message.text
+        link = await generate_map_link(fake_data[user_id]['evrodom_latitude'],
+                                       fake_data[user_id]['evrodom_longitude'])
+        sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx = int(sotix_narx[3]) * int(fake_data[user_id]['evrodom_xona']) + int(message.text)
+        print(narx)
+        if til[2] == "ru":
+            tuman = await translate_text(fake_data[user_id]['tuman'])
+            caption_ru = f"""
+<b>Таунхаус 🚩</b>
+
+<b>Туман 🚩</b> {tuman}
+<b>Геолокация 📍</b> <a href="{link}">Местоположение Таунхаус</a>
+<b>Ремонт 🛠</b> {fake_data[user_id]['evrodom_remont']}
+<b>Ремонт на сумму 💰</b> <code>{fake_data[user_id]['evrodom_remont_narx']}</code> 
+<b>Цена 💰</b> <code>{narx}$</code>    
+
+<b>Хотите рекламировать этот товар на нашем канале 📣</b>              
+            """
+            await message.answer(caption_ru, reply_markup=ok_no_ru)
+        else:
+            caption = f"""
+<b>evrodom 🚩</b>
+
+<b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
+<b>Geolokatsiya 📍</b> <a href="{link}">Uchastkangizning joylashuvi</a>
+<b>Xona 🏢</b> {fake_data[user_id]['evrodom_xona']}
+<b>Remont 🛠</b> {fake_data[user_id]['evrodom_remont']}
+<b>Remont narxi 💰</b> <code>{fake_data[user_id]['evrodom_remont_narx']}$</code>
+<b>Narx 💰</b> <code>{narx}$</code>
+
+<b>Siz ushbu mahsulotingizni bizning kanalimizga elon berishni xohlaysizmi 📣</b>
+            """
+            await message.answer(caption, reply_markup=ok_no)
+        await state.finish()
+        await EvroDom.kanalga_yuborish.set()
+
+        @dp.message_handler(text=["Ha ✅", "Да ✅"], state=EvroDom.kanalga_yuborish)
+        async def hayokiyoq(message: types.Message):
+            user_id = message.from_user.id
+            chat_member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
+            if chat_member.status in ['member', 'administrator', 'creator']:
+                if til[2] == "ru":
+                    caption_ru = f"""
+<b>Evrodom 🚩</b>
+
+<b>Туман 🚩</b> {tuman}
+<b>Геолокация 📍</b> <a href="{link}">Местоположение участка</a>
+<b>Комнаты 🏢</b> {fake_data[user_id]['evrodom_xona']}
+<b>Ремонт 🛠</b> {fake_data[user_id]['evrodom_remont']}
+<b>Ремонт на сумму 💰</b> <code>{fake_data[user_id]['evrodom_remont_narx']}</code>  
+<b>Цена 💰</b> <code>{narx}$</code>           
+                                """
+                    for admin in ADMINS:
+                        await bot.send_message(admin, caption_ru, reply_markup=ru_tasdiqlash_admin)
+
+                    @dp.callback_query_handler(text="tasdiqlash_ru", state=EvroDom.kanalga_yuborish)
+                    async def tasdiqlassh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Ваше объявление одобрено ✅\n\nСкоро будет отправлено на канал</b>")
+                        await call.bot.send_message(CHANNEL_ID, caption_ru)
+
+                    @dp.callback_query_handler(text="rad_etish_ru", state=EvroDom.kanalga_yuborish)
+                    async def rad_etishh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Ваше объявление отклонено ❌\n\nСпасибо за использование бота ☺</b>")
+
+                else:
+                    await message.answer(
+                        "<b>Sizning eloningiz qabul qilindi ✅\n\n24 soat ichida sizning eloningiz admin tomonidan tekshiriladi</b>")
+                    caption = f"""
+<b>EvroDom 🚩</b>
+
+<b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
+<b>Geolokatsiya 📍</b> <a href="{link}">Evrodomning joylashuvi</a>
+<b>Xona 🏢</b> {fake_data[user_id]['evrodom_xona']}
+<b>Remont 🛠</b> {fake_data[user_id]['evrodom_remont']}
+<b>Remont narxi 💰</b> <code>{fake_data[user_id]['evrodom_remont_narx']}$</code>
+<b>Narx 💰</b> <code>{narx}$</code>
+                                """
+                    for admin in ADMINS:
+                        await bot.send_message(admin, caption, reply_markup=tasdiqlash_admin)
+
+                    @dp.callback_query_handler(text="tasdiqlash", state=EvroDom.kanalga_yuborish)
+                    async def tasdiqlassh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Sizning eloningiz tasdiqlandi ✅\n\nYaqin orada kanalga yuboriladi</b>")
+                        await call.bot.send_message(CHANNEL_ID, caption)
+                        await state.finish()
+
+                    @dp.callback_query_handler(text="rad_etish", state=EvroDom.kanalga_yuborish)
+                    async def rad_etishh(call: types.CallbackQuery):
+                        await call.message.delete()
+                        await bot.send_message(user_id,
+                                               "<b>Sizning eloningiz tasdiqlanmadi ❌\n\nBotdan foydalananganingiz uchun rahmat ☺️</b>")
+                        await state.finish()
+            else:
+                if til[2] == "ru":
+                    await message.answer(f"Сначала подпишитесь на наш канал и попробуйте снова\n\n{CHANNEL_LINK}",
+                                         reply_markup=ok_no_ru)
+                else:
+                    await message.answer(
+                        f"Avvalam bor bizning kanalga obuna bo'ling va qayta urinib ko'ring\n\n{CHANNEL_LINK}",
+                        reply_markup=ok_no)
+    else:
+        if til[2] == "ru":
+            await message.answer(f"<b>Только введите номер ❌</b>", reply_markup=ru_ortga)
+        else:
+            await message.answer(f"<b>Faqat son kiriting ❌</b>", reply_markup=uz_ortga)
+
