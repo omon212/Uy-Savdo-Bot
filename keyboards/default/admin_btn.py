@@ -4,7 +4,6 @@ admin_btn = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Statistika 📊 "),
-            KeyboardButton(text="Yer maydon narxlari 🏘")
         ],
         [
             KeyboardButton(text="Yer maydon narxlarni qo'shish 🏘"),
@@ -17,7 +16,6 @@ ru_admin_btn = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Статистика 📊"),
-            KeyboardButton(text="Цены на земельные участки 🏘")
         ],
         [
             KeyboardButton(text="Добавить цены на земельные участки 🏘"),
