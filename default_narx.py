@@ -13,6 +13,7 @@ cursor.execute("""
         narx INTEGER)
 """)
 
+
 # Tumandagi va kategoriyadagi qiymatlar
 tumanlar = [
     "Bektemir", "Olmazor", "Uchtepa", "Chilonzor", "Sergeli",
