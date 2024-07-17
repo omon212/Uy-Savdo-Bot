@@ -30,6 +30,10 @@ for tuman in tumanlar:
     for kategoriya in kategoriyalar:
         cursor.execute("INSERT INTO narxlar (tuman, category, narx) VALUES (?, ?, ?)", (tuman, kategoriya, 100))
 
+for tuman in tumanlar:
+    for kategoriya in kategoriyalar:
+        cursor.execute("INSERT INTO narxlar_xona (tuman, category, narx) VALUES (?, ?, ?)", (tuman, kategoriya, 10000))
+
 # O'zgarishlarni saqlash
 conn.commit()
 

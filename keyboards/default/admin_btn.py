@@ -7,6 +7,7 @@ admin_btn = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Yer maydon narxlarni qo'shish 🏘"),
+            KeyboardButton(text="Xona uchun narx qoshish"),
             KeyboardButton(text="Tilni o`zgartirish 🌎")
         ]
     ],

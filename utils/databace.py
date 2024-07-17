@@ -13,6 +13,13 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS narxlar(
                 category TEXT,
                 narx INTEGER)""")
 
+cursor.execute("""CREATE TABLE IF NOT EXISTS narxlar_xona(
+id INTEGER PRIMARY KEY,
+tuman TEXT ,
+category TEXT, 
+narx INTEGER
+)""")
+
 cursor.execute("""DROP TABLE IF EXISTS kategory""")
 
 connect.commit()
@@ -59,7 +66,19 @@ async def narx_qoshish(tuman, category, narx):
         cursor.execute("UPDATE narxlar SET narx = ? WHERE tuman = ? AND category = ?", (narx, tuman, category))
         connect.commit()
 
+async def xonaga_narx_qoshish(tuman, category, narx):
+    check_category = cursor.execute("SELECT * FROM narxlar WHERE tuman = ? AND category = ?", (tuman, category)).fetchone()
+    if check_category == None:
+        cursor.execute("INSERT INTO narxlar_xona(tuman, category, narx) VALUES (?, ?, ?)", (tuman, category, narx))
+        connect.commit()
+    else:
+        cursor.execute("UPDATE narx_xona SET narx = ? WHERE tuman = ? AND category = ?", (narx, tuman, category))
+        connect.commit()
 
 async def narx_qidirish(tuman, category):
     result = cursor.execute("SELECT * FROM narxlar WHERE tuman = ? AND category = ?", (tuman, category)).fetchone()
+    return result
+
+async def xonaga_narx_qidirish(tuman, category):
+    result = cursor.execute("SELECT * FROM narxlar_xona WHERE tuman = ? AND category = ?", (tuman, category)).fetchone()
     return result

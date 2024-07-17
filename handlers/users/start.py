@@ -586,7 +586,10 @@ async def uchastkaremont(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['uchastka_latitude'],
                                        fake_data[user_id]['uchastka_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['uchastka_sotix'])
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['uchastka_sotix'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['uchastka_xona']))
+        narx = narx_1 + narx_2
         print(narx)
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
@@ -708,8 +711,10 @@ async def uchastkaremontnarx(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['uchastka_latitude'],
                                        fake_data[user_id]['uchastka_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['uchastka_sotix']) + int(message.text)
-        print(narx)
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['uchastka_sotix'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['uchastka_xona']))
+        narx = narx_1 + narx_2
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
             caption_ru = f"""
@@ -940,7 +945,10 @@ async def uchastkaremont(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['taunhouse_latitude'],
                                        fake_data[user_id]['taunhouse_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['taunhouse_sotix'])
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['taunhouse_sotix'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['taunhouse_xona']))
+        narx = narx_1 + narx_2
         print(narx)
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
@@ -1015,7 +1023,7 @@ async def uchastkaremont(message: types.Message, state: FSMContext):
 
 <b>Tuman 🚩</b> {fake_data[user_id]['tuman']}
 <b>Sotix 📏</b> {fake_data[user_id]['taunhouse_sotix']}
-<b>Geolokatsiya 📍</b> <a href="{link}">Uchastkangizning joylashuvi</a>
+<b>Geolokatsiya 📍</b> <a href="{link}">Tounhousening joylashuvi</a>
 <b>Xona 🏢</b> {fake_data[user_id]['taunhouse_xona']}
 <b>Remont 🛠</b> {fake_data[user_id]['taunhouse_remont']}
 <b>Narx 💰</b> <code>{narx}$</code>
@@ -1062,8 +1070,10 @@ async def uchastkaremontnarx(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['taunhouse_latitude'],
                                        fake_data[user_id]['taunhouse_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['taunhouse_sotix']) + int(message.text)
-        print(narx)
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['taunhouse_sotix']) + int(message.text)
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['taunhouse_xona']))
+        narx = narx_1 + narx_2
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
             caption_ru = f"""
@@ -1269,7 +1279,10 @@ async def evro_dom_remont(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['evrodom_latitude'],
                                        fake_data[user_id]['evrodom_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['evrodom_xona'])
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['evrodom_xona'])
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['evrodom_xona']))
+        narx = narx_1 + narx_2
         print(narx)
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
@@ -1389,7 +1402,10 @@ async def uchastkaremontnarx(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['evrodom_latitude'],
                                        fake_data[user_id]['evrodom_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['evrodom_xona']) + int(message.text)
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['evrodom_xona']) + int(message.text)
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['uchastka_xona']))
+        narx = narx_1 + narx_2
         print(narx)
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
@@ -1607,7 +1623,10 @@ async def evro_dom_remont(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['penhouse_latitude'],
                                        fake_data[user_id]['penhouse_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['penhouse_kvadratura'])
+        narx_1 = int(sotix_narx[3]) * int(fake_data[user_id]['penhouse_kvadratura'])
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['penhouse_xona']))
+        narx = narx_1 + narx_2
         print(narx)
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
@@ -1731,7 +1750,10 @@ async def uchastkaremontnarx(message: types.Message, state: FSMContext):
         link = await generate_map_link(fake_data[user_id]['penhouse_latitude'],
                                        fake_data[user_id]['penhouse_longitude'])
         sotix_narx = await narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
-        narx = int(sotix_narx[3]) * int(fake_data[user_id]['penhouse_kvadratura']) + int(message.text)
+        narx_1= int(sotix_narx[3]) * int(fake_data[user_id]['penhouse_kvadratura']) + int(message.text)
+        xona_narx = await xonaga_narx_qidirish(fake_data[user_id]['tuman'], fake_data[user_id]['kategoriya'])
+        narx_2 = int(xona_narx[3] * int(fake_data[user_id]['penhouse_xona']))
+        narx = narx_1 + narx_2
         print(narx)
         if til[2] == "ru":
             tuman = await translate_text(fake_data[user_id]['tuman'])
